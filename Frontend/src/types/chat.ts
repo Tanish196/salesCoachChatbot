@@ -3,6 +3,7 @@ export interface Message {
   content: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
+  isError?: boolean;
 }
 
 export interface Chat {

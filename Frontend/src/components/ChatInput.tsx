@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Send } from 'lucide-react';
 
 interface ChatInputProps {
@@ -15,10 +16,18 @@ function ChatInput({
   disabled = false,
   placeholder = "Ask me a question...",
 }: ChatInputProps) {
+  const [isShaking, setIsShaking] = useState(false);
+
   const submitMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!value.trim() || disabled) return;
+
+    if (disabled) return;
+
+    if (!value.trim()) {
+      setIsShaking(true);
+      window.setTimeout(() => setIsShaking(false), 300);
+      return;
+    }
     
     onSendMessage(value.trim());
   };
@@ -44,7 +53,7 @@ function ChatInput({
             <div className="w-[692px] py-3 px-2 gap-2">
               
               {/* TextArea Section */}
-              <div className="">
+              <div className={isShaking ? 'animate-shake' : ''}>
                 <textarea
                   value={value}
                   onChange={(e) => onChange(e.target.value)}
@@ -91,7 +100,7 @@ function ChatInput({
                     {/* Send Button */}
                     <button
                       type="submit"
-                      disabled={!value.trim() || disabled}
+                      disabled={disabled}
                       className={`flex-shrink-0 p-2 rounded-full transition-all ${
                         value.trim() && !disabled
                           ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'

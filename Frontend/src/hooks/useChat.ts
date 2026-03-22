@@ -6,6 +6,7 @@ export function useChat() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUserMessage, setLastUserMessage] = useState<string | null>(null);
 
   const currentChat = chats.find(chat => chat.id === currentChatId);
 
@@ -24,10 +25,11 @@ const sendMessage = useCallback(async (content: string) => {
   };
 
   setError(null);
+  setLastUserMessage(content);
 
   // Capture history BEFORE updating state (stale closure safe)
   const historyBeforeSend = (currentChat?.messages || [])
-    .filter(m => m.sender !== 'error')
+    .filter((m) => !m.isError)
     .map(m => ({
       role: m.sender === 'user' ? 'user' : 'assistant',
       content: m.content,
@@ -104,9 +106,10 @@ const sendMessage = useCallback(async (content: string) => {
 
     const errorMessage: Message = {
       id: `msg-${Date.now()}-error`,
-      content: 'Sorry, I could not reach Aria. Please try again.',
+      content: "Something went wrong. Aria couldn't respond.",
       sender: 'assistant',
       timestamp: new Date(),
+      isError: true,
     };
 
     setChats(prevChats => {
@@ -126,6 +129,11 @@ const sendMessage = useCallback(async (content: string) => {
     setIsLoading(false);
   }
 }, [currentChat, currentChatId]);
+
+  const retryLastMessage = useCallback(() => {
+    if (!lastUserMessage || isLoading) return;
+    void sendMessage(lastUserMessage);
+  }, [isLoading, lastUserMessage, sendMessage]);
   const selectChat = useCallback((chatId: string) => {
     setCurrentChatId(chatId);
   }, []);
@@ -140,7 +148,9 @@ const sendMessage = useCallback(async (content: string) => {
     currentChatId,
     isLoading,
     error,
+    lastUserMessage,
     sendMessage,
+    retryLastMessage,
     selectChat,
     startNewChat,
   };
