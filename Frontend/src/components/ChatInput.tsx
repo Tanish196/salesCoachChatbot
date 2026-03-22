@@ -52,7 +52,9 @@ function ChatInput({
                   placeholder={placeholder}
                   disabled={disabled}
                   rows={1}
-                  className="w-[676px] h-[92px] bg-transparent p-2 rounded-md border-2 border-gray-200 outline-none resize-none text-gray-900 placeholder-gray-500 text-sm leading-6"
+                  className={`w-[676px] h-[92px] bg-transparent p-2 rounded-md border-2 border-gray-200 outline-none resize-none text-gray-900 placeholder-gray-500 text-sm leading-6 ${
+                    disabled ? 'opacity-60 cursor-not-allowed' : ''
+                  }`}
                   style={{
                     minHeight: '24px',
                     maxHeight: '120px',
@@ -94,7 +96,7 @@ function ChatInput({
                         value.trim() && !disabled
                           ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
                           : 'bg-blue-200 text-gray-400 cursor-not-allowed'
-                      }`}
+                      } ${disabled ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''}`}
                       title="Send message"
                     >
                       <Send className="w-4 h-4" />

@@ -1,5 +1,5 @@
 const GEMINI_ENDPOINT =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 const SYSTEM_PROMPT = `You are Aria, an expert AI Sales Coach specializing in B2B outreach, 
 cold emailing, follow-up sequences, and sales strategy.
@@ -18,14 +18,34 @@ Rules:
   "I'm focused on sales coaching — ask me about outreach or closing deals!"
 - Always be direct, tactical, and give actionable advice
 - When writing emails, format them clearly with Subject, Body, and CTA sections
-- Never fabricate statistics — say "research suggests" if unsure`;
+- Never fabricate statistics — say "research suggests" if unsure
+- ALWAYS complete your full response. Never cut off mid-answer.`;
 
-function buildContents(message) {
-  return [
+function buildContents(history, newMessage) {
+  const contents = [
     { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
-    { role: 'model', parts: [{ text: 'Understood.' }] },
-    { role: 'user', parts: [{ text: message }] },
+    { role: 'model', parts: [{ text: 'Understood. I am Aria, your AI Sales Coach. How can I help?' }] },
   ];
+
+  // Inject conversation history
+  if (history && history.length > 0) {
+    history.forEach(({ role, content }) => {
+      if (role && content) {
+        contents.push({
+          role: role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: content }],
+        });
+      }
+    });
+  }
+
+  // Add the new message
+  contents.push({
+    role: 'user',
+    parts: [{ text: newMessage }],
+  });
+
+  return contents;
 }
 
 module.exports = async function handler(req, res) {
@@ -43,6 +63,7 @@ module.exports = async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const message = body?.message?.trim();
+    const history = Array.isArray(body?.history) ? body.history : [];
 
     if (!message) {
       res.status(400).json({ error: 'Missing message' });
@@ -51,11 +72,13 @@ module.exports = async function handler(req, res) {
 
     const response = await fetch(`${GEMINI_ENDPOINT}?key=${apiKey}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: buildContents(message),
+        contents: buildContents(history, message),
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1024, // ← ensures full responses
+        },
       }),
     });
 

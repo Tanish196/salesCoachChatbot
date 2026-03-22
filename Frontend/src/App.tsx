@@ -70,7 +70,7 @@ function App() {
         {showWelcome ? (
           <WelcomeScreen onPromptSelect={handlePromptSelect} />
         ) : (
-          <ChatMessages messages={currentChat.messages} />
+          <ChatMessages messages={currentChat.messages} isLoading={isLoading} />
         )}
         
         <ChatInput 
