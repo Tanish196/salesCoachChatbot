@@ -38,7 +38,7 @@ export default function ChatMessages({
                   <button
                     type="button"
                     onClick={onRetryLastMessage}
-                    className="mt-2 text-sm underline text-red-600"
+                    className="mt-2 text-sm underline text-red-600 transition-all duration-200 hover:text-red-700"
                   >
                     Try again
                   </button>

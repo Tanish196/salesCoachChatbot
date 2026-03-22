@@ -12,6 +12,7 @@ function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [draftMessage, setDraftMessage] = useState('');
   const [showOfflineToast, setShowOfflineToast] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
   const offlineToastTimerRef = useRef<number | null>(null);
   const { 
     chats, 
@@ -105,7 +106,8 @@ function App() {
       <div className={`flex-1 flex flex-col transition-all duration-300 ${mainContentMargin}`}>
         <ChatHeader 
           onToggleSidebar={toggleSidebar} 
-          onNewChat={startNewChat} 
+          onNewChat={startNewChat}
+          onOpenAbout={() => setShowAboutModal(true)}
         />
         
         {showWelcome ? (
@@ -126,6 +128,31 @@ function App() {
           placeholder={isLoading ? "Aria is thinking..." : "Ask me a question..."}
         />
       </div>
+
+      {showAboutModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center px-4"
+          onClick={() => setShowAboutModal(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-xl font-semibold text-gray-900 mb-3">About Aria</h3>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              Aria is an AI Sales Coach powered by Gemini. She specializes in cold outreach, email
+              sequences, and B2B sales strategy. Built for Thinkly Labs.
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowAboutModal(false)}
+              className="mt-6 w-full rounded-lg bg-indigo-600 text-white py-2.5 hover:bg-indigo-700 transition-all duration-200"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

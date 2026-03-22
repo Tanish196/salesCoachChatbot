@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Send } from 'lucide-react';
 
 interface ChatInputProps {
@@ -17,6 +17,11 @@ function ChatInput({
   placeholder = "Ask me a question...",
 }: ChatInputProps) {
   const [isShaking, setIsShaking] = useState(false);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   const submitMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +60,7 @@ function ChatInput({
               {/* TextArea Section */}
               <div className={isShaking ? 'animate-shake' : ''}>
                 <textarea
+                  ref={inputRef}
                   value={value}
                   onChange={(e) => onChange(e.target.value)}
                   onKeyDown={handleKeyPress}
@@ -101,9 +107,9 @@ function ChatInput({
                     <button
                       type="submit"
                       disabled={disabled}
-                      className={`flex-shrink-0 p-2 rounded-full transition-all ${
+                      className={`flex-shrink-0 p-2 rounded-full transition-all duration-200 ${
                         value.trim() && !disabled
-                          ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
+                          ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:scale-110 active:scale-95'
                           : 'bg-blue-200 text-gray-400 cursor-not-allowed'
                       } ${disabled ? 'opacity-60 cursor-not-allowed pointer-events-none' : ''}`}
                       title="Send message"

@@ -66,7 +66,7 @@ function WelcomeScreen({ onPromptSelect }: WelcomeScreenProps) {
             <button
               key={prompt.id}
               onClick={() => onPromptSelect(prompt.text)}
-              className="group p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all duration-200 text-left" 
+              className="group p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md hover:-translate-y-[2px] transition-all duration-200 text-left" 
               style={gradientBackground}
             >
               <div className="text-2xl mb-3 group-hover:scale-110 transition-transform duration-200">
@@ -78,6 +78,8 @@ function WelcomeScreen({ onPromptSelect }: WelcomeScreenProps) {
             </button>
           ))}
         </div>
+
+        <p className="text-xs text-gray-400 text-center">✦ Trained on sales best practices · Powered by AI</p>
       </div>
     </div>
   );

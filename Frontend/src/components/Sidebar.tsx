@@ -94,7 +94,7 @@ export default function Sidebar({
 
               {/* IconBubble */}
               <button
-                className={`${isOpen ? 'absolute top-8 right-[-10px] w-8 h-8 flex items-center justify-center rounded cursor-pointer hover:bg-blue-100 transition-colors':''}`}
+                className={`${isOpen ? 'absolute top-8 right-[-10px] w-8 h-8 flex items-center justify-center rounded cursor-pointer hover:bg-blue-100 transition-all duration-200':''}`}
                 style={{ background: "rgba(233, 239, 255, 1)" }}
                 onClick={onToggle}
                 type="button"
@@ -112,7 +112,7 @@ export default function Sidebar({
 
               {/* Sidebar / Item */}
               <div
-                className={`flex w-full justify-between p-3 rounded-[16px] cursor-pointer transition-colors ${activeNavItem === 'Home' ? 'bg-white border-[rgba(243, 243, 243, 1)]' : 'text-gray-700 hover:bg-gray-50'
+                className={`flex w-full justify-between p-3 rounded-[16px] cursor-pointer transition-all duration-200 ${activeNavItem === 'Home' ? 'bg-white border-[rgba(243, 243, 243, 1)]' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 style={activeNavItem === 'Home' ? {
                   boxShadow: '0px 0px 4px 0px rgba(0, 0, 0, 0.12)'
@@ -147,7 +147,7 @@ export default function Sidebar({
 
               {/* Sidebar / Item */}
               <div
-                className={`flex w-full justify-between p-3 rounded-[16px] cursor-pointer transition-colors ${activeNavItem === 'History' ? 'bg-white border-[rgba(243, 243, 243, 1)]' : 'text-gray-700 hover:bg-gray-50'
+                className={`flex w-full justify-between p-3 rounded-[16px] cursor-pointer transition-all duration-200 ${activeNavItem === 'History' ? 'bg-white border-[rgba(243, 243, 243, 1)]' : 'text-gray-700 hover:bg-gray-50'
                   }`}
                 style={activeNavItem === 'History' ? {
                   boxShadow: '0px 0px 4px 0px rgba(0, 0, 0, 0.12)'
@@ -196,7 +196,7 @@ export default function Sidebar({
                 {recentChats.map((chat) => (
                   <div
                     key={chat.id}
-                    className={`group w-full flex items-center justify-between rounded-lg px-3 py-2 transition-colors cursor-pointer ${currentChatId === chat.id
+                    className={`group w-full flex items-center justify-between rounded-lg px-3 py-2 transition-all duration-200 cursor-pointer ${currentChatId === chat.id
                       ? "bg-indigo-100 text-indigo-700"
                       : "text-gray-700 hover:bg-gray-100"
                       }`}
@@ -217,7 +217,7 @@ export default function Sidebar({
                     </div>
 
                     <button
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-gray-200 text-gray-400"
+                      className="opacity-0 group-hover:opacity-100 transition-all duration-200 p-1 rounded hover:bg-gray-200 text-gray-400"
                       type="button"
                       aria-label="Delete chat"
                       onClick={(e) => {
@@ -258,7 +258,7 @@ export default function Sidebar({
 
           {/* Open Sidebar Button */}
           <button
-            className="absolute top-7 right-[-15px] w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer hover:bg-blue-100 transition-colors mb-6"
+            className="absolute top-7 right-[-15px] w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer hover:bg-blue-100 transition-all duration-200 mb-6"
             style={{ background: "rgba(233, 239, 255, 1)" }}
             onClick={onToggle}
             type="button"
@@ -269,7 +269,7 @@ export default function Sidebar({
           {/* Navigation Icons */}
           <div className="flex flex-col gap-2 flex-1">
             <button
-              className={`w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-colors ${
+              className={`w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-200 ${
                 activeNavItem === 'Home' ? 'bg-white shadow-sm' : 'hover:bg-gray-100'
               }`}
               onClick={() => setActiveNavItem('Home')}
@@ -279,7 +279,7 @@ export default function Sidebar({
             </button>
 
             <button
-              className={`w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-colors ${
+              className={`w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-200 ${
                 activeNavItem === 'History' ? 'bg-white shadow-sm' : 'hover:bg-gray-100'
               }`}
               onClick={() => setActiveNavItem('History')}
