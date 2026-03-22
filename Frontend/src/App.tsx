@@ -10,11 +10,12 @@ const DESKTOP_BREAKPOINT = 1024;
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [draftMessage, setDraftMessage] = useState('');
   const { 
     chats, 
     currentChat, 
     currentChatId, 
-    isAssistantTyping, 
+    isLoading, 
     sendMessage, 
     selectChat, 
     startNewChat 
@@ -32,12 +33,18 @@ function App() {
   };
 
   const handleMessageSend = (message: string) => {
+    setDraftMessage('');
     sendMessage(message);
     
     const isMobile = window.innerWidth < DESKTOP_BREAKPOINT;
     if (isMobile && isSidebarOpen) {
       setIsSidebarOpen(false);
     }
+  };
+
+  const handlePromptSelect = (prompt: string) => {
+    setDraftMessage(prompt);
+    handleMessageSend(prompt);
   };
 
   const mainContentMargin = isSidebarOpen ? 'lg:ml-[336px]' : 'lg:ml-[72px]';
@@ -61,15 +68,17 @@ function App() {
         />
         
         {showWelcome ? (
-          <WelcomeScreen onPromptSelect={handleMessageSend} />
+          <WelcomeScreen onPromptSelect={handlePromptSelect} />
         ) : (
           <ChatMessages messages={currentChat.messages} />
         )}
         
         <ChatInput 
           onSendMessage={handleMessageSend}
-          disabled={isAssistantTyping}
-          placeholder={isAssistantTyping ? "Assistant is typing..." : "Ask me a question..."}
+          value={draftMessage}
+          onChange={setDraftMessage}
+          disabled={isLoading}
+          placeholder={isLoading ? "Aria is thinking..." : "Ask me a question..."}
         />
       </div>
     </div>

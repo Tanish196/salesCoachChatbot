@@ -1,36 +1,28 @@
 import { useState, useCallback } from 'react';
 import { Chat, Message } from '../types/chat';
 
-const ASSISTANT_RESPONSES = [
-  "I'd be happy to help you with that! Let me break this down for you.",
-  "Great question! Here's what I think about this topic...",
-  "That's an interesting point. Let me provide some insights on this.",
-  "I understand what you're looking for. Here's my response:",
-  "Excellent! I can definitely assist you with this request.",
-  "Thanks for asking! Here's a comprehensive answer to your question:",
-];
-
 export function useChat() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const [isAssistantTyping, setIsAssistantTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const currentChat = chats.find(chat => chat.id === currentChatId);
 
-  const createNewChat = useCallback(() => {
-    const newChatId = `chat-${Date.now()}`;
-    setCurrentChatId(newChatId);
-    return newChatId;
-  }, []);
-
-  const sendMessage = useCallback((content: string) => {
-    const chatId = currentChatId || createNewChat();
+  const sendMessage = useCallback(async (content: string) => {
+    let chatId = currentChatId;
+    if (!chatId) {
+      chatId = `chat-${Date.now()}`;
+      setCurrentChatId(chatId);
+    }
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
       content,
       sender: 'user',
       timestamp: new Date(),
     };
+
+    setError(null);
 
     setChats(prevChats => {
       const existingChatIndex = prevChats.findIndex(chat => chat.id === chatId);
@@ -55,14 +47,36 @@ export function useChat() {
       }
     });
 
-    // Simulate assistant response
-    setIsAssistantTyping(true);
-    
-    setTimeout(() => {
-      const randomResponse = ASSISTANT_RESPONSES[Math.floor(Math.random() * ASSISTANT_RESPONSES.length)];
+    setIsLoading(true);
+
+    try {
+      const conversation = [...(currentChat?.messages || []), userMessage];
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: conversation[conversation.length - 1].content,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorPayload = await response.json().catch(() => null);
+        throw new Error(errorPayload?.error || 'Chat request failed');
+      }
+
+      const data = await response.json();
+      const reply = data?.reply?.trim();
+
+      if (!reply) {
+        throw new Error('Empty response from API');
+      }
+
       const assistantMessage: Message = {
         id: `msg-${Date.now()}-assistant`,
-        content: randomResponse,
+        content: reply,
         sender: 'assistant',
         timestamp: new Date(),
       };
@@ -80,12 +94,34 @@ export function useChat() {
         }
         return prevChats;
       });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unexpected error';
+      setError(message);
 
-      setIsAssistantTyping(false);
-    }, 1000 + Math.random() * 2000); // Random delay between 1-3 seconds
+      const errorMessage: Message = {
+        id: `msg-${Date.now()}-error`,
+        content: 'Sorry, I could not reach Gemini. Please try again.',
+        sender: 'assistant',
+        timestamp: new Date(),
+      };
 
-    setCurrentChatId(chatId);
-  }, [currentChatId, createNewChat]);
+      setChats(prevChats => {
+        const chatIndex = prevChats.findIndex(chat => chat.id === chatId);
+        if (chatIndex >= 0) {
+          const updatedChats = [...prevChats];
+          updatedChats[chatIndex] = {
+            ...updatedChats[chatIndex],
+            messages: [...updatedChats[chatIndex].messages, errorMessage],
+            updatedAt: new Date(),
+          };
+          return updatedChats;
+        }
+        return prevChats;
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [currentChat, currentChatId]);
 
   const selectChat = useCallback((chatId: string) => {
     setCurrentChatId(chatId);
@@ -99,7 +135,8 @@ export function useChat() {
     chats,
     currentChat,
     currentChatId,
-    isAssistantTyping,
+    isLoading,
+    error,
     sendMessage,
     selectChat,
     startNewChat,

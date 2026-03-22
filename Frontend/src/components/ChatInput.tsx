@@ -1,22 +1,26 @@
-import { useState } from 'react';
 import { Send } from 'lucide-react';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
+  value: string;
+  onChange: (value: string) => void;
   disabled?: boolean;
   placeholder?: string;
 }
 
-function ChatInput({ onSendMessage, disabled = false, placeholder = "Ask me a question..." }: ChatInputProps) {
-  const [message, setMessage] = useState('');
-
+function ChatInput({
+  onSendMessage,
+  value,
+  onChange,
+  disabled = false,
+  placeholder = "Ask me a question...",
+}: ChatInputProps) {
   const submitMessage = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!message.trim() || disabled) return;
+    if (!value.trim() || disabled) return;
     
-    onSendMessage(message.trim());
-    setMessage('');
+    onSendMessage(value.trim());
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -42,8 +46,8 @@ function ChatInput({ onSendMessage, disabled = false, placeholder = "Ask me a qu
               {/* TextArea Section */}
               <div className="">
                 <textarea
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
                   onKeyDown={handleKeyPress}
                   placeholder={placeholder}
                   disabled={disabled}
@@ -52,7 +56,7 @@ function ChatInput({ onSendMessage, disabled = false, placeholder = "Ask me a qu
                   style={{
                     minHeight: '24px',
                     maxHeight: '120px',
-                    overflowY: message.length > 100 ? 'auto' : 'hidden'
+                    overflowY: value.length > 100 ? 'auto' : 'hidden'
                   }}
                 />
               </div>
@@ -78,16 +82,16 @@ function ChatInput({ onSendMessage, disabled = false, placeholder = "Ask me a qu
                   {/* Controls-Right */}
                   <div className="flex items-center gap-2">
                     {/* Character Count */}
-                    {message.length > 0 && (
-                      <span className="text-xs text-gray-500">{message.length}/1000</span>
+                    {value.length > 0 && (
+                      <span className="text-xs text-gray-500">{value.length}/1000</span>
                     )}
                     
                     {/* Send Button */}
                     <button
                       type="submit"
-                      disabled={!message.trim() || disabled}
+                      disabled={!value.trim() || disabled}
                       className={`flex-shrink-0 p-2 rounded-full transition-all ${
-                        message.trim() && !disabled
+                        value.trim() && !disabled
                           ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
                           : 'bg-blue-200 text-gray-400 cursor-not-allowed'
                       }`}
