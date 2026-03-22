@@ -48,7 +48,7 @@ function buildContents(history, newMessage) {
   return contents;
 }
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -77,7 +77,7 @@ module.exports = async function handler(req, res) {
         contents: buildContents(history, message),
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 1024, // ← ensures full responses
+          maxOutputTokens: 1024,
         },
       }),
     });
@@ -101,6 +101,7 @@ module.exports = async function handler(req, res) {
 
     res.status(200).json({ reply });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to generate response' });
+    const message = error instanceof Error ? error.message : 'Failed to generate response';
+    res.status(500).json({ error: message });
   }
-};
+}
