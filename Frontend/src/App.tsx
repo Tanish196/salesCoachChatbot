@@ -22,7 +22,8 @@ function App() {
     sendMessage, 
     retryLastMessage,
     selectChat, 
-    startNewChat 
+    startNewChat,
+    deleteChat,
   } = useChat();
 
   useEffect(() => {
@@ -98,7 +99,7 @@ function App() {
         chats={chats}
         currentChatId={currentChatId}
         onChatSelect={selectChat}
-        onNewChat={startNewChat}
+        onDeleteChat={deleteChat}
       />
       
       <div className={`flex-1 flex flex-col transition-all duration-300 ${mainContentMargin}`}>

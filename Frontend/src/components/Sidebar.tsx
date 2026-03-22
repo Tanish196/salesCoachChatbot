@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { History, Star, MoreHorizontal, ChevronsUpDown, Rocket, ChevronRight } from 'lucide-react';
-import { ChevronLeftIcon, MagnifyingGlassIcon, ChatBubbleOvalLeftEllipsisIcon, FolderIcon, GlobeEuropeAfricaIcon } from '@heroicons/react/24/solid';
+import { History, ChevronRight, X } from 'lucide-react';
+import { ChevronLeftIcon, ChatBubbleOvalLeftEllipsisIcon } from '@heroicons/react/24/solid';
 import { Chat } from '../types/chat';
 import VectorLogo from '../assets/2.1 New Chat/Vector.svg';
 
@@ -10,7 +10,32 @@ interface SidebarProps {
   chats: Chat[];
   currentChatId: string | null;
   onChatSelect: (chatId: string) => void;
-  onNewChat: () => void;
+  onDeleteChat: (chatId: string) => void;
+}
+
+function getRelativeTime(date: Date) {
+  const now = Date.now();
+  const diffMs = now - date.getTime();
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  if (diffMs < hour) {
+    const minutes = Math.max(1, Math.floor(diffMs / minute));
+    return `${minutes}m ago`;
+  }
+
+  if (diffMs < day) {
+    const hours = Math.floor(diffMs / hour);
+    return `${hours}h ago`;
+  }
+
+  if (diffMs < day * 2) {
+    return 'Yesterday';
+  }
+
+  const days = Math.floor(diffMs / day);
+  return `${days}d ago`;
 }
 
 export default function Sidebar({
@@ -19,7 +44,7 @@ export default function Sidebar({
   chats,
   currentChatId,
   onChatSelect,
-  onNewChat,
+  onDeleteChat,
 }: SidebarProps) {
   const recentChats = chats.slice(0, 10);
   const [activeNavItem, setActiveNavItem] = useState('Home');
@@ -164,7 +189,7 @@ export default function Sidebar({
                   lineHeight: '100%',
                   letterSpacing: '-0.8%'
                 }}>
-                  Recent Chats
+                  Recent
                 </div>
               </div>
               <div className="w-[280px] gap-1  flex flex-col">
@@ -172,31 +197,35 @@ export default function Sidebar({
                   <div
                     key={chat.id}
                     className={`group w-full flex items-center justify-between rounded-lg px-3 py-2 transition-colors cursor-pointer ${currentChatId === chat.id
-                      ? "bg-blue-50 text-blue-700"
+                      ? "bg-indigo-100 text-indigo-700"
                       : "text-gray-700 hover:bg-gray-100"
                       }`}
                     onClick={() => onChatSelect(chat.id)}
                   >
-                    <div className="flex-1 truncate text-sm" style={{
-                      fontFamily: 'Bricolage Grotesque',
-                      fontWeight: 400,
-                      fontStyle: 'normal',
-                      fontSize: '14px',
-                      lineHeight: '120%',
-                      letterSpacing: '-0.2%'
-                    }}>
-                      {chat.title}
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate text-sm" style={{
+                        fontFamily: 'Bricolage Grotesque',
+                        fontWeight: 400,
+                        fontStyle: 'normal',
+                        fontSize: '14px',
+                        lineHeight: '120%',
+                        letterSpacing: '-0.2%'
+                      }}>
+                        {chat.title}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">{getRelativeTime(chat.updatedAt)}</div>
                     </div>
 
-                    {/* 3-dots icon - only shows on hover */}
                     <button
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-gray-200"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-gray-200 text-gray-400"
+                      type="button"
+                      aria-label="Delete chat"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // Handle menu click here
+                        onDeleteChat(chat.id);
                       }}
                     >
-                      <MoreHorizontal className="w-4 h-4 text-gray-500" />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
                 ))}

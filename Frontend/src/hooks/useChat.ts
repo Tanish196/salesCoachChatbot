@@ -1,8 +1,51 @@
 import { useState, useCallback } from 'react';
 import { Chat, Message } from '../types/chat';
+import { useLocalStorage } from './useLocalStorage';
+
+const STORAGE_KEY = 'aria_chats';
+const MAX_SAVED_CHATS = 10;
+
+type StoredMessage = Omit<Message, 'timestamp'> & { timestamp: string | Date };
+type StoredChat = Omit<Chat, 'messages' | 'createdAt' | 'updatedAt'> & {
+  messages: StoredMessage[];
+  createdAt: string | Date;
+  updatedAt: string | Date;
+};
+
+function normalizeChats(rawChats: StoredChat[]): Chat[] {
+  return rawChats.map((chat) => ({
+    ...chat,
+    createdAt: new Date(chat.createdAt),
+    updatedAt: new Date(chat.updatedAt),
+    messages: chat.messages.map((message) => ({
+      ...message,
+      timestamp: new Date(message.timestamp),
+    })),
+  }));
+}
+
+function limitSavedChats(chats: Chat[]): Chat[] {
+  if (chats.length <= MAX_SAVED_CHATS) {
+    return chats;
+  }
+
+  const oldestIdsToRemove = new Set(
+    [...chats]
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      .slice(0, chats.length - MAX_SAVED_CHATS)
+      .map((chat) => chat.id),
+  );
+
+  return chats.filter((chat) => !oldestIdsToRemove.has(chat.id));
+}
+
+function persistableChats(chats: Chat[]): StoredChat[] {
+  return chats as StoredChat[];
+}
 
 export function useChat() {
-  const [chats, setChats] = useState<Chat[]>([]);
+  const [storedChats, setStoredChats] = useLocalStorage<StoredChat[]>(STORAGE_KEY, []);
+  const [chats, setChats] = useState<Chat[]>(() => normalizeChats(storedChats));
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +91,7 @@ const sendMessage = useCallback(async (content: string) => {
     } else {
       const newChat: Chat = {
         id: chatId!,
-        title: content.slice(0, 50) + (content.length > 50 ? '...' : ''),
+        title: content.slice(0, 40) + (content.length > 40 ? '...' : ''),
         messages: [userMessage],
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -95,7 +138,11 @@ const sendMessage = useCallback(async (content: string) => {
           messages: [...updatedChats[chatIndex].messages, assistantMessage],
           updatedAt: new Date(),
         };
-        return updatedChats;
+
+        const dedupedAndLimited = limitSavedChats(updatedChats);
+        setStoredChats(persistableChats(dedupedAndLimited));
+
+        return dedupedAndLimited;
       }
       return prevChats;
     });
@@ -140,7 +187,21 @@ const sendMessage = useCallback(async (content: string) => {
 
   const startNewChat = useCallback(() => {
     setCurrentChatId(null);
+    setError(null);
+    setLastUserMessage(null);
   }, []);
+
+  const deleteChat = useCallback((chatId: string) => {
+    setChats((prevChats) => {
+      const filteredChats = prevChats.filter((chat) => chat.id !== chatId);
+      setStoredChats(persistableChats(filteredChats));
+      return filteredChats;
+    });
+
+    if (currentChatId === chatId) {
+      setCurrentChatId(null);
+    }
+  }, [currentChatId, setStoredChats]);
 
   return {
     chats,
@@ -153,5 +214,6 @@ const sendMessage = useCallback(async (content: string) => {
     retryLastMessage,
     selectChat,
     startNewChat,
+    deleteChat,
   };
 }
