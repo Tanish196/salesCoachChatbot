@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { Message } from '../types/chat';
 
 interface ChatMessageProps {
@@ -56,7 +57,11 @@ export default function ChatMessage({ role, content, timestamp }: ChatMessagePro
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
           )}
-          {content}
+          {isUser ? (
+            content
+          ) : (
+            <ReactMarkdown className="prose prose-sm max-w-none text-gray-800">{content}</ReactMarkdown>
+          )}
         </div>
         {timeLabel && (
           <div className={`text-xs text-gray-400 mt-1 ${isUser ? 'text-right' : 'text-left'}`}>

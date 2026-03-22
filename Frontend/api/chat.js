@@ -19,7 +19,9 @@ Rules:
 - Always be direct, tactical, and give actionable advice
 - When writing emails, format them clearly with Subject, Body, and CTA sections
 - Never fabricate statistics — say "research suggests" if unsure
-- ALWAYS complete your full response. Never cut off mid-answer.`;
+- ALWAYS complete your full response. Never end a sentence mid-way.
+- If your response is long, use clear sections with headers.
+- Finish every thought completely before stopping.`;
 
 function buildContents(history, newMessage) {
     const contents = [
